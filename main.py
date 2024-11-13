@@ -3,7 +3,6 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import deepl
 
 from typing import Union
-
 from fastapi import FastAPI
 from pydantic import BaseModel
 
@@ -30,23 +29,9 @@ def review_feedback_sentiment(text):
 
 @app.put("/")
 def evaluate_feedback(message: Feedback):
-    # print()
-    # text = input('Enter text for evaluation:\n')
-    # print()
-    # print("RESULT [ORIGINAL]: ")
-    # result = review_feedback_sentiment(text)
-    # grade = result['Excellent'][0] + 0.5*result['Good'][0] - 0.5*result['Poor'][0] - result['Terrible'][0]
-    # grade = grade*0.5 + 0.5
-    # print('Proposed grade /100: ' + str(grade))
-    # print('Proposed grade /95: ' + str(grade*0.95))
-    # print()
-    # print("RESULT [TRANSLATED]: ")
     translator = deepl.Translator(auth_key)
     translatedText = translator.translate_text(message.text, target_lang="EN-US")
     result = review_feedback_sentiment(translatedText.text)
     grade = result['Excellent'][0] + 0.5*result['Good'][0] - 0.5*result['Poor'][0] - result['Terrible'][0]
     grade = grade*0.5 + 0.5
-    # print('Proposed grade /100: ' + str(grade))
-    # print('Proposed grade /95: ' + str(grade*0.95))
-    # print()
     return {"grade_100": str(grade), "grade_95": str(grade*0.95)}
