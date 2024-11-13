@@ -4,3 +4,4 @@ transformers==4.28.1
 typing
 fastapi
 pydantic
+deepl
