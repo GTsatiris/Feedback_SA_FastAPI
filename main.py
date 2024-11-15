@@ -10,6 +10,7 @@ app = FastAPI()
 
 class Feedback(BaseModel):
     text: str
+    needsTranslation: bool
 
 auth_key = "2b600082-a432-4ed6-881b-57f2f0450713:fx"
 tokenizer = AutoTokenizer.from_pretrained('nlptown/bert-base-multilingual-uncased-sentiment')
@@ -29,9 +30,11 @@ def review_feedback_sentiment(text):
 
 @app.put("/")
 def evaluate_feedback(message: Feedback):
-    translator = deepl.Translator(auth_key)
-    translatedText = translator.translate_text(message.text, target_lang="EN-US")
-    result = review_feedback_sentiment(translatedText.text)
+    finalText = message
+    if message.needsTranslation:
+        translator = deepl.Translator(auth_key)
+        finalText = translator.translate_text(message.text, target_lang="EN-US")
+    result = review_feedback_sentiment(finalText.text)
     grade = result['Excellent'][0] + 0.5*result['Good'][0] - 0.5*result['Poor'][0] - result['Terrible'][0]
     grade = grade*0.5 + 0.5
     return {"grade_100": str(grade), "grade_95": str(grade*0.95)}
